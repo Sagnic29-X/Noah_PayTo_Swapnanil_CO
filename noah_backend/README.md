@@ -1,1 +1,327 @@
 # noah-backend
+Noah AI Backend — Dockerized
+Overview
+
+Noah is an AI assistant backend built with FastAPI. The backend provides API endpoints for chat, NLP processing, planning, retrieval, and LLM-based responses.
+
+The backend is containerized using Docker, so the application and its Python dependencies can be run without manually configuring a Python virtual environment.
+
+Requirements
+
+Before running the project, install:
+
+Docker Desktop
+
+Git (only required if obtaining the project through Git)
+
+Valid API credentials required by the configured services
+
+Python and a local .venv are not required when running the application with Docker.
+
+Project Structure
+noah_backend/
+│
+├── app/
+│   ├── api/
+│   ├── llm/
+│   ├── models/
+│   ├── nlp/
+│   ├── planner/
+│   ├── rag/
+│   └── tools/
+│
+├── Dockerfile
+├── .dockerignore
+├── .gitignore
+├── requirements.txt
+├── .env.example
+└── README.md
+
+Environment Variables
+
+The application may require API keys or other configuration values.
+
+Create a .env file in the project root.
+
+If .env.example is provided, copy it:
+
+PowerShell
+Copy-Item .env.example .env
+
+Linux/macOS
+cp .env.example .env
+
+
+Then add the required API keys and configuration values.
+
+Do not commit or share the .env file if it contains secrets.
+
+Running with Docker
+1. Open a terminal in the project directory
+cd noah_backend
+
+2. Build the Docker image
+docker build -t noah-backend .
+
+
+Docker will:
+
+Download the Python base image.
+
+Install the required Python dependencies.
+
+Copy the application into the container.
+
+Configure Uvicorn to run the FastAPI application.
+
+3. Start the container
+
+If you have a .env file:
+
+docker run --rm -p 8000:8000 --env-file .env noah-backend
+
+
+The application will be available at:
+
+http://localhost:8000
+
+Testing the Backend
+Health Check
+
+Open:
+
+http://localhost:8000/health
+
+
+Expected response:
+
+{
+  "status": "ok"
+}
+
+
+A successful response with HTTP status 200 confirms that the Docker container and FastAPI application are running correctly.
+
+API Documentation
+
+FastAPI provides an interactive API documentation interface.
+
+Open:
+
+http://localhost:8000/docs
+
+
+From this page, API endpoints can be viewed and tested using the Try it out functionality.
+
+Root Endpoint
+
+Open:
+
+http://localhost:8000/
+
+
+Expected response:
+
+{
+  "service": "Noah",
+  "status": "running"
+}
+
+Stopping the Container
+
+If the container was started with:
+
+docker run --rm -p 8000:8000 --env-file .env noah-backend
+
+
+press:
+
+Ctrl + C
+
+
+to stop it.
+
+Alternatively, if the container was started in detached mode, find it with:
+
+docker ps
+
+
+and stop it using:
+
+docker stop <CONTAINER_ID>
+
+Port Configuration
+
+The Noah backend uses port 8000.
+
+The Docker port mapping is:
+
+8000:8000
+  ↑    ↑
+  │    └── Port inside the container
+  └─────── Port on the host machine
+
+
+If port 8000 is already being used, another host port can be selected.
+
+For example:
+
+docker run --rm -p 8001:8000 --env-file .env noah-backend
+
+
+The application would then be available at:
+
+http://localhost:8001
+
+Docker Files
+Dockerfile
+
+The Dockerfile uses Python 3.12 and installs the application's required dependencies.
+
+The FastAPI application is started with:
+
+uvicorn app.main:app
+
+
+The server listens on:
+
+0.0.0.0:8000
+
+
+This allows the application to be accessed from the host machine through Docker's port mapping.
+
+.dockerignore
+
+The following files and directories are excluded from the Docker image:
+
+.venv/
+__pycache__/
+*.pyc
+.git/
+.env
+.vscode/
+.idea/
+
+
+This prevents local virtual environments, caches, Git metadata, development configuration, and secrets from being copied into the Docker image.
+
+Python Environment
+
+A local Python virtual environment is not required to run the Dockerized backend.
+
+The Docker image installs the dependencies specified in:
+
+requirements.txt
+
+
+Therefore, the container provides an isolated and reproducible Python environment.
+
+Security
+
+API keys and other secrets should never be stored directly in the Dockerfile or committed to the repository.
+
+Use a local .env file:
+
+.env
+
+
+and provide it to Docker at runtime:
+
+docker run --rm -p 8000:8000 --env-file .env noah-backend
+
+
+The .env file should remain private.
+
+Troubleshooting
+Port 8000 is already allocated
+
+If Docker reports:
+
+Bind for 0.0.0.0:8000 failed: port is already allocated
+
+
+another application or Docker container is already using port 8000.
+
+Check running containers:
+
+docker ps
+
+
+Stop the existing container:
+
+docker stop <CONTAINER_ID>
+
+
+Or use another host port:
+
+docker run --rm -p 8001:8000 --env-file .env noah-backend
+
+Check Docker
+
+Verify that Docker Desktop is running:
+
+docker info
+
+
+Then verify the image exists:
+
+docker images
+
+
+You should see:
+
+noah-backend
+
+Rebuild the image
+
+If application or dependency changes are made, rebuild:
+
+docker build -t noah-backend .
+
+
+If Docker cache needs to be completely ignored:
+
+docker build --no-cache -t noah-backend .
+
+
+The --no-cache option should normally only be used when necessary because it causes Docker to rebuild all layers.
+
+Quick Start
+
+For a quick setup:
+
+cd noah_backend
+
+Copy-Item .env.example .env
+
+docker build -t noah-backend .
+
+docker run --rm -p 8000:8000 --env-file .env noah-backend
+
+
+Then open:
+
+http://localhost:8000/docs
+
+
+or test:
+
+http://localhost:8000/health
+
+Dockerization Status
+
+The Noah backend has been successfully containerized and tested using Docker.
+
+Verified:
+
+FastAPI application starts successfully.
+
+Uvicorn runs inside the container.
+
+Port 8000 is exposed and mapped to the host.
+
+/health returns HTTP 200 OK.
+
+Docker manages the Python runtime and application dependencies.
+
+Local .venv is not required for the Dockerized application.
